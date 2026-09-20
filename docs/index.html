@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="นักสืบวิทย์เมืองช่าง">
+    <meta name="theme-color" content="#FF7A45">
+    <title>นักสืบวิทย์เมืองช่าง</title>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #FFF4DE; overflow: hidden; overscroll-behavior: none; position: fixed; inset: 0; }
+      * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+      #unity-canvas { width: 100%; height: 100%; display: block; background: #FFF4DE; touch-action: none; }
+      #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; color: #2B2D42; background: #FFF4DE; transition: opacity .4s; z-index: 5; }
+      #bar { width: 260px; height: 14px; background: #e8dcc6; border-radius: 7px; overflow: hidden; margin-top: 14px; }
+      #fill { height: 100%; width: 0; background: #FF7A45; border-radius: 7px; transition: width .2s; }
+      #fs { position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); padding: 8px 16px; border: 0; border-radius: 10px; background: rgba(43,45,66,.75); color: #fff; font: bold 16px sans-serif; cursor: pointer; display: none; z-index: 6; }
+      #rotate { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #FFF4DE; color: #2B2D42; font-family: sans-serif; text-align: center; z-index: 10; padding: 24px; }
+      #rotate .phone { width: 70px; height: 120px; border: 6px solid #2B2D42; border-radius: 14px; margin-bottom: 24px; animation: turn 1.6s ease-in-out infinite; }
+      @keyframes turn { 0%, 20% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
+      @media (orientation: portrait) and (max-width: 900px) { #rotate { display: flex; } }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <button id="fs">⛶ เต็มจอ</button>
+    <div id="rotate"><div class="phone"></div><div style="font-size:26px;font-weight:bold">กรุณาหมุนโทรศัพท์เป็นแนวนอน</div><div style="font-size:16px;margin-top:8px;opacity:.7">เกมนี้เล่นในแนวนอนเท่านั้น</div></div>
+    <div id="loader"><div style="font-size:28px;font-weight:bold">นักสืบวิทย์เมืองช่าง</div><div style="font-size:16px;margin-top:6px">กำลังโหลดเกม...</div><div id="bar"><div id="fill"></div></div></div>
+    <script>
+      // GitHub file limit: the data file is published in parts; hand Unity's loader one joined stream.
+      (function () {
+        var parts = ["a","b","c"], total = 112838384, real = window.fetch;
+        window.fetch = function (input, init) {
+          var url = typeof input === "string" ? input : input.url;
+          if (url.indexOf("WebGL.data.unityweb") < 0) return real.apply(this, arguments);
+          var q = url.indexOf("?") >= 0 ? url.slice(url.indexOf("?")) : "", base = url.split("?")[0];
+          if (init && init.method === "HEAD") return real(base + ".p" + parts[0] + q, init);
+          var reqs = parts.map(function (p) { return real(base + ".p" + p + q); });
+          var i = 0, reader = null;
+          var stream = new ReadableStream({
+            pull: function (ctrl) {
+              function next() {
+                if (reader) return reader.read().then(function (r) { if (r.done) { reader = null; i++; return next(); } ctrl.enqueue(r.value); });
+                if (i >= reqs.length) { ctrl.close(); return; }
+                return reqs[i].then(function (res) { if (!res.ok) throw new Error("data part " + i + ": " + res.status); reader = res.body.getReader(); return next(); });
+              }
+              return next();
+            }
+          });
+          return Promise.resolve(new Response(stream, { status: 200, headers: { "Content-Length": String(total), "Content-Type": "application/octet-stream" } }));
+        };
+      })();
+    </script>
+    <script src="Build/WebGL.loader.js?v=20260920-2008"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      function lockLandscape() { try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(function () {}); } catch (e) {} }
+      function goFullscreen(u) {
+        try {
+          var el = document.documentElement;
+          if (el.requestFullscreen) el.requestFullscreen().then(lockLandscape).catch(function () { u.SetFullscreen(1); });
+          else u.SetFullscreen(1);
+        } catch (e) { try { u.SetFullscreen(1); } catch (e2) {} }
+      }
+      createUnityInstance(canvas, {
+        arguments: [],
+        dataUrl: "Build/WebGL.data.unityweb?v=20260920-2008",
+        frameworkUrl: "Build/WebGL.framework.js.unityweb?v=20260920-2008",
+        codeUrl: "Build/WebGL.wasm.unityweb?v=20260920-2008",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Sci Detective",
+        productName: "นักสืบวิทย์เมืองช่าง",
+        productVersion: "20260920-2008",
+        // phones: render at a lower pixel ratio for smooth animation; desktops: cap at 2x
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2),
+      }, function (p) { document.getElementById("fill").style.width = Math.round(p * 100) + "%"; })
+      .then(function (u) {
+        var l = document.getElementById("loader"); l.style.opacity = 0; setTimeout(function () { l.remove(); }, 400);
+        var b = document.getElementById("fs");
+        if (!isIOS) { b.style.display = "block"; b.onclick = function () { goFullscreen(u); }; }
+        if (isMobile) canvas.addEventListener("touchend", lockLandscape, { once: true });
+      })
+      .catch(function (m) { alert(m); });
+    </script>
+  </body>
+</html>
