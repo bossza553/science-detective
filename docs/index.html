@@ -31,7 +31,7 @@
     <script>
       // GitHub file limit: the data file is published in parts; hand Unity's loader one joined stream.
       (function () {
-        var parts = ["a","b","c"], total = 118452261, real = window.fetch;
+        var parts = ["a","b","c"], total = 118463118, real = window.fetch;
         window.fetch = function (input, init) {
           var url = typeof input === "string" ? input : input.url;
           if (url.indexOf("WebGL.data.unityweb") < 0) return real.apply(this, arguments);
@@ -53,7 +53,7 @@
         };
       })();
     </script>
-    <script src="Build/WebGL.loader.js?v=20260921-1652"></script>
+    <script src="Build/WebGL.loader.js?v=20260921-1817"></script>
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
@@ -68,13 +68,13 @@
       }
       createUnityInstance(canvas, {
         arguments: [],
-        dataUrl: "Build/WebGL.data.unityweb?v=20260921-1652",
-        frameworkUrl: "Build/WebGL.framework.js.unityweb?v=20260921-1652",
-        codeUrl: "Build/WebGL.wasm.unityweb?v=20260921-1652",
+        dataUrl: "Build/WebGL.data.unityweb?v=20260921-1817",
+        frameworkUrl: "Build/WebGL.framework.js.unityweb?v=20260921-1817",
+        codeUrl: "Build/WebGL.wasm.unityweb?v=20260921-1817",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Sci Detective",
         productName: "นักสืบวิทย์เมืองช่าง",
-        productVersion: "20260921-1652",
+        productVersion: "20260921-1817",
         // phones: render at a lower pixel ratio for smooth animation; desktops: cap at 2x
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2),
       }, function (p) { document.getElementById("fill").style.width = Math.round(p * 100) + "%"; })
